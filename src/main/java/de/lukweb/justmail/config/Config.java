@@ -20,6 +20,8 @@ public class Config {
 
 	private String host;
 
+	private DBConfig dbConfig;
+
 	private String salt;
 	private String keystore;
 	private String keyPassword;
@@ -53,6 +55,15 @@ public class Config {
 			imap.add("port", 143);
 
 			Section database = ini.add("database");
+			database.add("name", "mysql");
+			database.add("driver", "com.mysql.jdbc.Driver");
+			database.putComment("driver", "Drivers for example: com.mysql.jdbc.Driver for mysql, org.sqlite.JDBC for sqlite");
+			database.add("url", "jdbc:mysql://127.0.0.1:3306/Mail");
+			database.putComment("url", "URL should be written as follows: <protocol>://<host>:<posrt>/<database>; " +
+					"file based database please leave it blank");
+			database.add("username", "root");
+			database.add("password", "toor");
+			database.putComment("username", "Remember to change username and password");
 			database.add("salt", "ChangeMeOrTheApplicationIsVeryUnsafe");
 			database.putComment("salt", "Don't change the salt after the first user was generated, otherwise users " +
 					"can't login!");
@@ -80,6 +91,14 @@ public class Config {
 					"[imap]\n" +
 					"port=143\n\n" +
 					"[database]\n" +
+					"name=mysql\n" +
+					";Drivers for example: com.mysql.jdbc.Driver for mysql, org.sqlite.JDBC for sqlite\n" +
+					"driver=com.mysql.jdbc.Driver\n" +
+					";URL should be written as follows: <protocol>://<host>:<posrt>/<database>; file based database please leave it blank" +
+					"url=jdbc:mysql://127.0.0.1:3306/Mail\n" +
+					";Remember to change username and password\n" +
+					"username=root\n" +
+					"password=toor\n" +
 					";Don't change the salt after the first user was generated, otherwise users can't login!\n" +
 					"salt=ChangeMeOrTheApplicationIsVeryUnsafe!\n" +
 					";This is the maxium size for a email, here it's 10MB.\n" +
@@ -110,6 +129,7 @@ public class Config {
 			imapPort = Integer.parseInt(imap.get("port"));
 
 			Section db = ini.get("database");
+			dbConfig = new DBConfig(db.get("name"), db.get("driver"), db.get("url"), db.get("username"), db.get("password"));
 			salt = db.get("salt");
 			maxMailSize = Long.parseLong(db.get("max_mail_size"));
 
@@ -145,6 +165,10 @@ public class Config {
 
 	public int getImapPort() {
 		return imapPort;
+	}
+
+	public DBConfig getDbConfig() {
+		return dbConfig;
 	}
 
 	public String getSalt() {
