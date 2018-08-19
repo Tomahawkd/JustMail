@@ -7,6 +7,7 @@ import de.lukweb.justmail.crypto.KeyManager;
 import de.lukweb.justmail.socket.ImapSocketServer;
 import de.lukweb.justmail.socket.MailSocketServer;
 import de.lukweb.justmail.sql.Storages;
+import de.lukweb.justmail.sql.databases.DBConnectorFactory;
 import de.lukweb.justmail.sql.storages.Domains;
 import de.lukweb.justmail.utils.NetUtils;
 
@@ -44,6 +45,8 @@ public class JustMail {
 		if (!key.isLoaded()) return;
 
 		if (!NetUtils.isPortOpen(config.getSmtpPort())) return;
+
+		DBConnectorFactory.setConfig(config.getDbConfig());
 
 		smtpServer = new MailSocketServer(config.getSmtpPort());
 		Thread smtpThread = new Thread(() -> smtpServer.start());
