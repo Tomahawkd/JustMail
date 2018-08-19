@@ -127,3 +127,5 @@ hs_err_pid*
 .idea/modules.xml
 src/main/main.iml
 /JustMail.iml
+.idea/compiler.xml
+.idea/vcs.xml
