@@ -12,25 +12,25 @@ import de.lukweb.justmail.sql.storages.Mailboxes;
  */
 public class DeleteC extends ImapCommand {
 
-    public DeleteC() {
-        super("delete");
-    }
+	public DeleteC() {
+		super("delete");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
-        if (!session.checkForAuthentication(tag)) return;
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
+		if (!session.checkForAuthentication(tag)) return;
 
-        if (arguments.length < 1) {
-            session.send(ImapResponse.BAD.create(tag, "Invalid arguments"));
-            return;
-        }
+		if (arguments.length < 1) {
+			session.send(ImapResponse.BAD.create(tag, "Invalid arguments"));
+			return;
+		}
 
-        Mailbox mailbox = Storages.get(Mailboxes.class).get(session.getUser(), arguments[0]);
-        if (!session.checkForExistence(tag, mailbox)) return;
+		Mailbox mailbox = Storages.get(Mailboxes.class).get(session.getUser(), arguments[0]);
+		if (!session.checkForExistence(tag, mailbox)) return;
 
-        if (session.getSelected() != null && session.getSelected().equals(mailbox)) session.setSelected(null);
-        Storages.get(Mailboxes.class).delete(mailbox);
+		if (session.getSelected() != null && session.getSelected().equals(mailbox)) session.setSelected(null);
+		Storages.get(Mailboxes.class).delete(mailbox);
 
-        session.send(ImapResponse.OK.create(tag, "DELETE Completed"));
-    }
+		session.send(ImapResponse.OK.create(tag, "DELETE Completed"));
+	}
 }

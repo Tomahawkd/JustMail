@@ -7,16 +7,16 @@ import java.net.ServerSocket;
 
 public class NetUtils {
 
-    public static boolean isPortOpen(int port) {
-        try {
-            ServerSocket socket = new ServerSocket(port);
-            socket.close();
-            return true;
-        } catch (IOException e) {
-            JustLogger.logger().severe("An error occurred while binding port " + port + ": " + e.getLocalizedMessage());
-            // e.printStackTrace();
-        }
-        return false;
-    }
+	public static boolean isPortOpen(int port) {
+		try {
+			ServerSocket socket = new ServerSocket(port);
+			socket.close();
+			return true;
+		} catch (IOException e) {
+			JustLogger.logger().severe("An error occurred while binding port " + port + ": " + e.getLocalizedMessage());
+			// e.printStackTrace();
+		}
+		return false;
+	}
 
 }

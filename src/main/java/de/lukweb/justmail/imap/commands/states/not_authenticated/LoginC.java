@@ -13,30 +13,30 @@ import java.util.Arrays;
 
 public class LoginC extends ImapCommand {
 
-    public LoginC() {
-        super("login");
-    }
+	public LoginC() {
+		super("login");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
-        if (arguments.length < 2) {
-            session.send(ImapPredefinedResponse.BAD_INVALID_ARGUMENTS.create(tag));
-            return;
-        }
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
+		if (arguments.length < 2) {
+			session.send(ImapPredefinedResponse.BAD_INVALID_ARGUMENTS.create(tag));
+			return;
+		}
 
-        Users users = Storages.get(Users.class);
+		Users users = Storages.get(Users.class);
 
-        String name = arguments[0];
-        byte[] password = CryptoUtils.generateSHA512Password(arguments[1].toCharArray());
+		String name = arguments[0];
+		byte[] password = CryptoUtils.generateSHA512Password(arguments[1].toCharArray());
 
-        User user = users.getByMail(name);
-        if (user == null || !Arrays.equals(user.getPasswords().getPassword(), password)) {
-            session.send(ImapResponse.BAD.create(tag, "user cannot be found or the password is incorrect"));
-            return;
-        }
+		User user = users.getByMail(name);
+		if (user == null || !Arrays.equals(user.getPasswords().getPassword(), password)) {
+			session.send(ImapResponse.BAD.create(tag, "user cannot be found or the password is incorrect"));
+			return;
+		}
 
-        session.send(ImapResponse.OK.create(tag,"LOGIN completed"));
-        session.setUser(user);
-    }
+		session.send(ImapResponse.OK.create(tag, "LOGIN completed"));
+		session.setUser(user);
+	}
 
 }

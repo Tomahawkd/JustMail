@@ -8,13 +8,13 @@ import de.lukweb.justmail.imap.commands.objects.ImapCommand;
  */
 public class LsubC extends ImapCommand {
 
-    public LsubC() {
-        super("lsub");
-    }
+	public LsubC() {
+		super("lsub");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
 
-    }
+	}
 
 }

@@ -14,72 +14,72 @@ import java.io.File;
 
 public class JustMail {
 
-    private static JustMail instance;
+	private static JustMail instance;
 
-    private KeyManager key;
-    private Config config;
+	private KeyManager key;
+	private Config config;
 
-    private MailSocketServer smtpServer;
-    private ImapSocketServer imapServer;
-    private Thread consoleThread;
+	private MailSocketServer smtpServer;
+	private ImapSocketServer imapServer;
+	private Thread consoleThread;
 
-    private boolean stopped;
+	private boolean stopped;
 
-    public JustMail() {
-        instance = this;
-        start();
-    }
+	public JustMail() {
+		instance = this;
+		start();
+	}
 
-    private void start() {
-        System.out.println("Starting JustMail...");
+	public static JustMail getInstance() {
+		return instance;
+	}
 
-        config = new Config(new File("config.ini"));
-        if (!config.isValid()) return;
+	private void start() {
+		System.out.println("Starting JustMail...");
 
-        key = new KeyManager(new File(config.getKeystore()), config.getKeyPassword());
-        if (!key.isLoaded()) return;
+		config = new Config(new File("config.ini"));
+		if (!config.isValid()) return;
 
-        if (!NetUtils.isPortOpen(config.getSmtpPort())) return;
+		key = new KeyManager(new File(config.getKeystore()), config.getKeyPassword());
+		if (!key.isLoaded()) return;
 
-        smtpServer = new MailSocketServer(config.getSmtpPort());
-        Thread smtpThread = new Thread(() -> smtpServer.start());
-        smtpThread.setName("SMTP Server");
-        smtpThread.start();
+		if (!NetUtils.isPortOpen(config.getSmtpPort())) return;
 
-        imapServer = new ImapSocketServer(config.getImapPort());
-        Thread imapThread = new Thread(() -> imapServer.start());
-        imapThread.setName("IMAP Server");
-        imapThread.start();
+		smtpServer = new MailSocketServer(config.getSmtpPort());
+		Thread smtpThread = new Thread(() -> smtpServer.start());
+		smtpThread.setName("SMTP Server");
+		smtpThread.start();
 
-        consoleThread = new Thread(new ConsoleCMDThread());
-        consoleThread.setName("Console Thread");
-        consoleThread.start();
+		imapServer = new ImapSocketServer(config.getImapPort());
+		Thread imapThread = new Thread(() -> imapServer.start());
+		imapThread.setName("IMAP Server");
+		imapThread.start();
 
-        Storages.get(Domains.class);
+		consoleThread = new Thread(new ConsoleCMDThread());
+		consoleThread.setName("Console Thread");
+		consoleThread.start();
 
-        JustLogger.logger().info("Started the JustMail server successfully!");
-    }
+		Storages.get(Domains.class);
 
-    public void stop() {
-        if (stopped) return;
-        stopped = true;
-        JustLogger.logger().info("Stopping the mail server...");
-        Storages.shutdown();
-        if (smtpServer != null) smtpServer.stop();
-        if (imapServer != null) imapServer.stop();
-        if (consoleThread != null) consoleThread.interrupt();
-        JustLogger.logger().info("See you next time!");
-    }
+		JustLogger.logger().info("Started the JustMail server successfully!");
+	}
 
-    public static JustMail getInstance() {
-        return instance;
-    }
+	public void stop() {
+		if (stopped) return;
+		stopped = true;
+		JustLogger.logger().info("Stopping the mail server...");
+		Storages.shutdown();
+		if (smtpServer != null) smtpServer.stop();
+		if (imapServer != null) imapServer.stop();
+		if (consoleThread != null) consoleThread.interrupt();
+		JustLogger.logger().info("See you next time!");
+	}
 
-    public Config getConfig() {
-        return config;
-    }
+	public Config getConfig() {
+		return config;
+	}
 
-    public KeyManager getKey() {
-        return key;
-    }
+	public KeyManager getKey() {
+		return key;
+	}
 }

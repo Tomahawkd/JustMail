@@ -12,25 +12,25 @@ import de.lukweb.justmail.sql.storages.Mailboxes;
  */
 public class CreateC extends ImapCommand {
 
-    public CreateC() {
-        super("create");
-    }
+	public CreateC() {
+		super("create");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
-        if (!session.checkForAuthentication(tag)) return;
-        if (arguments.length < 1) {
-            session.send(ImapResponse.BAD.create(tag, "Arguments invalid"));
-            return;
-        }
-        // todo add split thing
-        Mailbox mailbox = Storages.get(Mailboxes.class).get(session.getUser(), arguments[0]);
-        if (mailbox != null) {
-            session.send(ImapResponse.NO.create(tag, "Mailbox already exists"));
-            return;
-        }
-        mailbox = new Mailbox(-1, arguments[0], session.getUser());
-        Storages.get(Mailboxes.class).save(mailbox);
-        session.send(ImapResponse.OK.create(tag, "CREATE completed"));
-    }
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
+		if (!session.checkForAuthentication(tag)) return;
+		if (arguments.length < 1) {
+			session.send(ImapResponse.BAD.create(tag, "Arguments invalid"));
+			return;
+		}
+		// todo add split thing
+		Mailbox mailbox = Storages.get(Mailboxes.class).get(session.getUser(), arguments[0]);
+		if (mailbox != null) {
+			session.send(ImapResponse.NO.create(tag, "Mailbox already exists"));
+			return;
+		}
+		mailbox = new Mailbox(-1, arguments[0], session.getUser());
+		Storages.get(Mailboxes.class).save(mailbox);
+		session.send(ImapResponse.OK.create(tag, "CREATE completed"));
+	}
 }

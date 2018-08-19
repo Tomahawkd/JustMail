@@ -14,98 +14,96 @@ import java.net.SocketException;
 
 public abstract class Session {
 
-    private Socket socket;
-    private DataInputStream in;
-    private DataOutputStream out;
-    private SSLSocket ssl;
+	protected boolean saidGoodbye;
+	protected User user;
+	private Socket socket;
+	private DataInputStream in;
+	private DataOutputStream out;
+	private SSLSocket ssl;
+	private boolean upgradingToSSL;
+	private CatchStreamCallback callback;
 
-    private boolean upgradingToSSL;
-    protected boolean saidGoodbye;
+	public Session(Socket socket) throws IOException {
+		this.socket = socket;
+		this.in = new DataInputStream(socket.getInputStream());
+		this.out = new DataOutputStream(socket.getOutputStream());
+	}
 
-    protected User user;
-    private CatchStreamCallback callback;
+	public DataInputStream getIn() {
+		return in;
+	}
 
-    public Session(Socket socket) throws IOException {
-        this.socket = socket;
-        this.in = new DataInputStream(socket.getInputStream());
-        this.out = new DataOutputStream(socket.getOutputStream());
-    }
+	public DataOutputStream getOut() {
+		return out;
+	}
 
-    public DataInputStream getIn() {
-        return in;
-    }
+	public void send(String response) {
+		if (upgradingToSSL) return;
+		try {
+			out.write(response.getBytes());
+			out.flush();
+		} catch (IOException e) {
+			if (e instanceof SocketException) {
+				JustLogger.logger().fine("Server from " + socket.getInetAddress().getHostAddress() + " closed " +
+						"connection!");
+				close();
+				return;
+			}
+			e.printStackTrace();
+		}
+	}
 
-    public DataOutputStream getOut() {
-        return out;
-    }
+	public void upgradeToSSL() {
+		upgradingToSSL = true;
+		CryptoUtils.upgradeConnection(socket, true, sslSocket -> {
+			this.ssl = sslSocket;
+			try {
+				this.in = new DataInputStream(sslSocket.getInputStream());
+				this.out = new DataOutputStream(sslSocket.getOutputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			upgradingToSSL = false;
+		});
+	}
 
-    public void send(String response) {
-        if (upgradingToSSL) return;
-        try {
-            out.write(response.getBytes());
-            out.flush();
-        } catch (IOException e) {
-            if (e instanceof SocketException) {
-                JustLogger.logger().fine("Server from " + socket.getInetAddress().getHostAddress() + " closed " +
-                        "connection!");
-                close();
-                return;
-            }
-            e.printStackTrace();
-        }
-    }
+	public boolean isUpgradingToSSL() {
+		return upgradingToSSL;
+	}
 
-    public void upgradeToSSL() {
-        upgradingToSSL = true;
-        CryptoUtils.upgradeConnection(socket, true, sslSocket -> {
-            this.ssl = sslSocket;
-            try {
-                this.in = new DataInputStream(sslSocket.getInputStream());
-                this.out = new DataOutputStream(sslSocket.getOutputStream());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            upgradingToSSL = false;
-        });
-    }
+	public boolean isUsingSSL() {
+		return ssl != null;
+	}
 
-    public boolean isUpgradingToSSL() {
-        return upgradingToSSL;
-    }
+	public CatchStreamCallback getCallback() {
+		return callback;
+	}
 
-    public boolean isUsingSSL() {
-        return ssl != null;
-    }
+	public void setCallback(CatchStreamCallback callback) {
+		this.callback = callback;
+	}
 
-    public CatchStreamCallback getCallback() {
-        return callback;
-    }
+	public User getUser() {
+		return user;
+	}
 
-    public void setCallback(CatchStreamCallback callback) {
-        this.callback = callback;
-    }
+	public void setUser(User user) {
+		this.user = user;
+	}
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+	public abstract void sayGoodbye();
 
-    public User getUser() {
-        return user;
-    }
-
-    public abstract void sayGoodbye();
-
-    public void close() {
-        if (!saidGoodbye) sayGoodbye();
-        try {
-            in.close();
-            out.close();
-        } catch (IOException e) {
-        } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-            }
-        }
-    }
+	public void close() {
+		if (!saidGoodbye) sayGoodbye();
+		try {
+			in.close();
+			out.close();
+		} catch (IOException ignored) {
+		} finally {
+			try {
+				socket.close();
+			} catch (IOException ignored) {
+			}
+		}
+	}
 }

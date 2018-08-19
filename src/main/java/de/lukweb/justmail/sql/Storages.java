@@ -12,36 +12,36 @@ import java.util.concurrent.TimeUnit;
 
 public class Storages {
 
-    private static HashMap<Class<?>, DBStorage> storages = new HashMap<>();
-    private static ScheduledExecutorService pool = Executors.newScheduledThreadPool(2);
+	private static HashMap<Class<?>, DBStorage> storages = new HashMap<>();
+	private static ScheduledExecutorService pool = Executors.newScheduledThreadPool(2);
 
-    static {
-        new Domains();
-        new Mails();
-        new Users();
-        new Mailboxes();
-    }
+	static {
+		new Domains();
+		new Mails();
+		new Users();
+		new Mailboxes();
+	}
 
-    static void register(Class<?> clazz, DBStorage storage) {
-        storages.put(clazz, storage);
-    }
+	static void register(Class<?> clazz, DBStorage storage) {
+		storages.put(clazz, storage);
+	}
 
-    static ScheduledExecutorService getPool() {
-        return pool;
-    }
+	static ScheduledExecutorService getPool() {
+		return pool;
+	}
 
-    @SuppressWarnings("unchecked")
-    public static <T extends DBStorage> T get(Class<T> clazz) {
-        return (T) storages.get(clazz);
-    }
+	@SuppressWarnings("unchecked")
+	public static <T extends DBStorage> T get(Class<T> clazz) {
+		return (T) storages.get(clazz);
+	}
 
-    public static void shutdown() {
-        pool.shutdown();
-        try {
-            if (!pool.awaitTermination(5, TimeUnit.SECONDS)) pool.shutdownNow();
-        } catch (InterruptedException e) {
-            pool.shutdownNow();
-        }
-    }
+	public static void shutdown() {
+		pool.shutdown();
+		try {
+			if (!pool.awaitTermination(5, TimeUnit.SECONDS)) pool.shutdownNow();
+		} catch (InterruptedException e) {
+			pool.shutdownNow();
+		}
+	}
 
 }

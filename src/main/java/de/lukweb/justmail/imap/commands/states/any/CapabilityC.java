@@ -6,14 +6,14 @@ import de.lukweb.justmail.imap.responses.ImapResponse;
 
 public class CapabilityC extends ImapCommand {
 
-    public CapabilityC() {
-        super("capability");
-    }
+	public CapabilityC() {
+		super("capability");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
-        session.send(ImapResponse.OK.create("*", "CAPABILITY IMAP4rev1 STARTTLS SASL-IR AUTH=PLAIN AUTH=LOGIN"));
-        session.send(ImapResponse.OK.create(tag, "CAPABILITY completed"));
-    }
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
+		session.send(ImapResponse.OK.create("*", "CAPABILITY IMAP4rev1 STARTTLS SASL-IR AUTH=PLAIN AUTH=LOGIN"));
+		session.send(ImapResponse.OK.create(tag, "CAPABILITY completed"));
+	}
 
 }

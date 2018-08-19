@@ -9,23 +9,23 @@ import de.lukweb.justmail.sql.storages.Mailboxes;
 
 public class UnsubscribeC extends ImapCommand {
 
-    public UnsubscribeC() {
-        super("unsubscribe");
-    }
+	public UnsubscribeC() {
+		super("unsubscribe");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
-        if (!session.checkForAuthentication(tag)) return;
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
+		if (!session.checkForAuthentication(tag)) return;
 
-        if (arguments.length < 1) {
-            session.send(ImapResponse.BAD.create(tag, "Invalid arguments"));
-            return;
-        }
+		if (arguments.length < 1) {
+			session.send(ImapResponse.BAD.create(tag, "Invalid arguments"));
+			return;
+		}
 
-        Mailbox mailbox = Storages.get(Mailboxes.class).get(session.getUser(), arguments[0]);
-        if (!session.checkForExistence(tag, mailbox)) return;
-        session.removeSubscribed(mailbox);
+		Mailbox mailbox = Storages.get(Mailboxes.class).get(session.getUser(), arguments[0]);
+		if (!session.checkForExistence(tag, mailbox)) return;
+		session.removeSubscribed(mailbox);
 
-        session.send(ImapResponse.OK.create(tag, "UNSUBSCRIBE completed"));
-    }
+		session.send(ImapResponse.OK.create(tag, "UNSUBSCRIBE completed"));
+	}
 }

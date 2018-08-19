@@ -2,12 +2,12 @@ package de.lukweb.justmail.console.commands.objects;
 
 public interface ConsoleCommand {
 
-    String getCommand();
+	String getCommand();
 
-    String getDescription();
+	String getDescription();
 
-    String getSyntax();
+	String getSyntax();
 
-    void execute(String[] args);
+	void execute(String[] args);
 
 }

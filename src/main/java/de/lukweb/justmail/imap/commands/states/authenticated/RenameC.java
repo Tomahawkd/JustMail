@@ -9,27 +9,27 @@ import de.lukweb.justmail.sql.storages.Mailboxes;
 
 public class RenameC extends ImapCommand {
 
-    public RenameC() {
-        super("rename");
-    }
+	public RenameC() {
+		super("rename");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
-        if (!session.checkForAuthentication(tag)) return;
-        if (arguments.length < 2) {
-            session.send(ImapResponse.BAD.create(tag, "Arguments invalid"));
-            return;
-        }
-        // todo add split thing
-        Mailbox mailbox = Storages.get(Mailboxes.class).get(session.getUser(), arguments[0]);
-        if (mailbox == null) {
-            session.send(ImapResponse.NO.create(tag, "Mailbox does not exist"));
-            return;
-        }
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
+		if (!session.checkForAuthentication(tag)) return;
+		if (arguments.length < 2) {
+			session.send(ImapResponse.BAD.create(tag, "Arguments invalid"));
+			return;
+		}
+		// todo add split thing
+		Mailbox mailbox = Storages.get(Mailboxes.class).get(session.getUser(), arguments[0]);
+		if (mailbox == null) {
+			session.send(ImapResponse.NO.create(tag, "Mailbox does not exist"));
+			return;
+		}
 
-        mailbox.setName(arguments[1]);
-        Storages.get(Mailboxes.class).save(mailbox);
-        session.send(ImapResponse.OK.create(tag, "RENAME completed"));
+		mailbox.setName(arguments[1]);
+		Storages.get(Mailboxes.class).save(mailbox);
+		session.send(ImapResponse.OK.create(tag, "RENAME completed"));
 
-    }
+	}
 }

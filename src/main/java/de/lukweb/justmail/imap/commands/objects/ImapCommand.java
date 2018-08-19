@@ -5,16 +5,16 @@ import de.lukweb.justmail.imap.ImapSession;
 
 public abstract class ImapCommand {
 
-    private String command;
+	private String command;
 
-    protected ImapCommand(String command) {
-        this.command = command;
-        ImapCommands.registerCommand(this);
-    }
+	protected ImapCommand(String command) {
+		this.command = command;
+		ImapCommands.registerCommand(this);
+	}
 
-    public String getCommand() {
-        return command;
-    }
+	public String getCommand() {
+		return command;
+	}
 
-    public abstract void execute(String[] arguments, String tag, ImapSession session);
+	public abstract void execute(String[] arguments, String tag, ImapSession session);
 }

@@ -6,13 +6,13 @@ import de.lukweb.justmail.imap.responses.ImapResponse;
 
 public class NoopC extends ImapCommand {
 
-    public NoopC() {
-        super("noop");
-    }
+	public NoopC() {
+		super("noop");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
-        session.send(ImapResponse.OK.create(tag, "NOOP completed"));
-    }
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
+		session.send(ImapResponse.OK.create(tag, "NOOP completed"));
+	}
 
 }

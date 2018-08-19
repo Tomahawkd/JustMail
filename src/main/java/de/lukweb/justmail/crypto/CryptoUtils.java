@@ -9,22 +9,11 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -32,109 +21,109 @@ import java.util.function.Consumer;
 
 public class CryptoUtils {
 
-    public static byte[] generateSHA512Password(char[] password) {
-        return generateSHA512Password(password, JustMail.getInstance().getConfig().getSalt().getBytes(StandardCharsets.UTF_8));
-    }
+	private static Cipher aes;
+	private static SecretKeySpec key;
 
-    public static byte[] generateSHA512Password(char[] password, byte[] salt) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-512");
-            md.update(salt);
-            return md.digest(StringUtils.toBytes(password));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return new byte[]{};
-    }
+	static {
+		try {
+			aes = Cipher.getInstance("AES");
 
-    private static Cipher aes;
-    private static SecretKeySpec key;
+			byte[] keyBytes = JustMail.getInstance().getConfig().getSalt().getBytes(StandardCharsets.UTF_8);
+			MessageDigest sha = MessageDigest.getInstance("SHA-1");
+			keyBytes = sha.digest(keyBytes);
+			keyBytes = Arrays.copyOf(keyBytes, 16);
 
-    static {
-        try {
-            aes = Cipher.getInstance("AES");
+			key = new SecretKeySpec(keyBytes, "AES");
 
-            byte[] keyBytes = JustMail.getInstance().getConfig().getSalt().getBytes(StandardCharsets.UTF_8);
-            MessageDigest sha = MessageDigest.getInstance("SHA-1");
-            keyBytes = sha.digest(keyBytes);
-            keyBytes = Arrays.copyOf(keyBytes, 16);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			JustLogger.logger().warning("Cannot get cipher of AES: " + e.getMessage());
+		}
+	}
 
-            key = new SecretKeySpec(keyBytes, "AES");
+	public static byte[] generateSHA512Password(char[] password) {
+		return generateSHA512Password(password, JustMail.getInstance().getConfig().getSalt().getBytes(StandardCharsets.UTF_8));
+	}
 
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            JustLogger.logger().warning("Cannot get cipher of AES: " + e.getMessage());
-        }
-    }
+	public static byte[] generateSHA512Password(char[] password, byte[] salt) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-512");
+			md.update(salt);
+			return md.digest(StringUtils.toBytes(password));
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return new byte[]{};
+	}
 
-    public static byte[] encryptAES(String string) {
-        byte[] data = string.getBytes();
-        try {
-            aes.init(Cipher.ENCRYPT_MODE, key);
-            return aes.doFinal(data);
-        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+	public static byte[] encryptAES(String string) {
+		byte[] data = string.getBytes();
+		try {
+			aes.init(Cipher.ENCRYPT_MODE, key);
+			return aes.doFinal(data);
+		} catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-    public static String decryptAES(byte[] data) {
-        try {
-            aes.init(Cipher.DECRYPT_MODE, key);
-            return new String(aes.doFinal(data), StandardCharsets.UTF_8);
-        } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+	public static String decryptAES(byte[] data) {
+		try {
+			aes.init(Cipher.DECRYPT_MODE, key);
+			return new String(aes.doFinal(data), StandardCharsets.UTF_8);
+		} catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
-    public static SSLSocket upgradeConnection(Socket socket, boolean server, Consumer<SSLSocket> callback) {
-        try {
-            SSLContext sc = SSLContext.getInstance("TLSv1");
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            kmf.init(JustMail.getInstance().getKey().getStore(), JustMail.getInstance().getConfig().getKeyPassword()
-                    .toCharArray());
-            sc.init(kmf.getKeyManagers(), new TrustManager[]{
-                    new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(X509Certificate[] x509Certificates, String s)
-                                throws CertificateException {
-                        }
+	public static SSLSocket upgradeConnection(Socket socket, boolean server, Consumer<SSLSocket> callback) {
+		try {
+			SSLContext sc = SSLContext.getInstance("TLSv1");
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+			kmf.init(JustMail.getInstance().getKey().getStore(), JustMail.getInstance().getConfig().getKeyPassword()
+					.toCharArray());
+			sc.init(kmf.getKeyManagers(), new TrustManager[]{
+					new X509TrustManager() {
+						@Override
+						public void checkClientTrusted(X509Certificate[] x509Certificates, String s)
+								throws CertificateException {
+						}
 
-                        @Override
-                        public void checkServerTrusted(X509Certificate[] x509Certificates, String s)
-                                throws CertificateException {
-                        }
+						@Override
+						public void checkServerTrusted(X509Certificate[] x509Certificates, String s)
+								throws CertificateException {
+						}
 
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-                    }
-            }, new SecureRandom());
-            SSLSocketFactory sslSocketFactory = sc.getSocketFactory();
-            SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(
-                    socket,
-                    socket.getInetAddress().getHostAddress(),
-                    socket.getPort(),
-                    true);
-            sslSocket.setEnableSessionCreation(true);
-            sslSocket.setUseClientMode(!server);
+						@Override
+						public X509Certificate[] getAcceptedIssuers() {
+							return null;
+						}
+					}
+			}, new SecureRandom());
+			SSLSocketFactory sslSocketFactory = sc.getSocketFactory();
+			SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(
+					socket,
+					socket.getInetAddress().getHostAddress(),
+					socket.getPort(),
+					true);
+			sslSocket.setEnableSessionCreation(true);
+			sslSocket.setUseClientMode(!server);
 
-            sslSocket.setEnabledCipherSuites(sc.getServerSocketFactory().getSupportedCipherSuites());
-            sslSocket.setEnabledProtocols(new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"});
+			sslSocket.setEnabledCipherSuites(sc.getServerSocketFactory().getSupportedCipherSuites());
+			sslSocket.setEnabledProtocols(new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"});
 
-            sslSocket.addHandshakeCompletedListener(handshakeCompletedEvent ->
-                    callback.accept(handshakeCompletedEvent.getSocket()));
+			sslSocket.addHandshakeCompletedListener(handshakeCompletedEvent ->
+					callback.accept(handshakeCompletedEvent.getSocket()));
 
-            sslSocket.startHandshake();
+			sslSocket.startHandshake();
 
-        } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
-            JustLogger.logger().warning("Cannot upgrade connection from " + socket.getInetAddress().getHostAddress() + " to " +
-                    "TLS: " + e.getMessage());
-        } catch (UnrecoverableKeyException | KeyStoreException e) {
-            JustLogger.logger().warning("Cannot load key: " + e.getLocalizedMessage());
-        }
-        return null;
-    }
+		} catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
+			JustLogger.logger().warning("Cannot upgrade connection from " + socket.getInetAddress().getHostAddress() + " to " +
+					"TLS: " + e.getMessage());
+		} catch (UnrecoverableKeyException | KeyStoreException e) {
+			JustLogger.logger().warning("Cannot load key: " + e.getLocalizedMessage());
+		}
+		return null;
+	}
 
 }

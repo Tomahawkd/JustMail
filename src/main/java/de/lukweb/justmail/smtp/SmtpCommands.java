@@ -8,44 +8,44 @@ import java.util.HashMap;
 
 public class SmtpCommands {
 
-    private static HashMap<String, SmtpCommand> commands = new HashMap<>();
+	private static HashMap<String, SmtpCommand> commands = new HashMap<>();
 
-    static {
-        new AuthC();
-        new DataC();
-        new EhloC();
-        new HeloC();
-        new HeloC();
-        new HelpC();
-        new MailC();
-        new NoopC();
-        new QuitC();
-        new RcptC();
-        new RsetC();
-        new StartTlsC();
-        new VerifyC();
-    }
+	static {
+		new AuthC();
+		new DataC();
+		new EhloC();
+		new HeloC();
+		new HeloC();
+		new HelpC();
+		new MailC();
+		new NoopC();
+		new QuitC();
+		new RcptC();
+		new RsetC();
+		new StartTlsC();
+		new VerifyC();
+	}
 
-    public static void registerCommand(SmtpCommand command) {
-        commands.put(command.getCommand().toUpperCase(), command);
-    }
+	public static void registerCommand(SmtpCommand command) {
+		commands.put(command.getCommand().toUpperCase(), command);
+	}
 
-    private static SmtpCommand getCommand(String command) {
-        return commands.get(command.toUpperCase());
-    }
+	private static SmtpCommand getCommand(String command) {
+		return commands.get(command.toUpperCase());
+	}
 
-    public static void handleCommand(String commandStr, SmtpSession session) {
-        String[] commandSplit = commandStr.replaceAll("\\n", "").replaceAll("\\r", "").split(" ");
-        String commandName = commandSplit[0].trim();
+	public static void handleCommand(String commandStr, SmtpSession session) {
+		String[] commandSplit = commandStr.replaceAll("\\n", "").replaceAll("\\r", "").split(" ");
+		String commandName = commandSplit[0].trim();
 
-        SmtpCommand command = getCommand(commandName);
-        if (command == null) {
-            session.send(SmtpResponse.COMMAND_UNRECOGNIZED.create());
-            return;
-        }
+		SmtpCommand command = getCommand(commandName);
+		if (command == null) {
+			session.send(SmtpResponse.COMMAND_UNRECOGNIZED.create());
+			return;
+		}
 
-        command.execute(Arrays.copyOfRange(commandSplit, 1, commandSplit.length), session);
+		command.execute(Arrays.copyOfRange(commandSplit, 1, commandSplit.length), session);
 
-    }
+	}
 
 }

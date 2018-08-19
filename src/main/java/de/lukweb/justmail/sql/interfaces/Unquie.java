@@ -2,8 +2,8 @@ package de.lukweb.justmail.sql.interfaces;
 
 public interface Unquie {
 
-    int getId();
+	int getId();
 
-    void setId(int id);
+	void setId(int id);
 
 }

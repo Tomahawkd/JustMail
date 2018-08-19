@@ -8,51 +8,50 @@ import java.util.logging.Logger;
 
 public class JustLogger {
 
-    private static JustLogger instance;
+	private static JustLogger instance;
+	private Logger logger;
+	private Environment environment;
 
-    public static JustLogger getInstance() {
-        if (instance == null) instance = new JustLogger();
-        return instance;
-    }
+	private JustLogger() {
+		this.environment = checkEnvironment();
+		this.logger = setupLogger();
+	}
 
-    public static Logger logger() {
-        return getInstance().getLogger();
-    }
+	public static JustLogger getInstance() {
+		if (instance == null) instance = new JustLogger();
+		return instance;
+	}
 
-    private Logger logger;
-    private Environment environment;
+	public static Logger logger() {
+		return getInstance().getLogger();
+	}
 
-    private JustLogger() {
-        this.environment = checkEnvironment();
-        this.logger = setupLogger();
-    }
+	private Logger setupLogger() {
+		Logger logger = Logger.getLogger("JustMail");
 
-    private Logger setupLogger() {
-        Logger logger = Logger.getLogger("JustMail");
+		for (Handler iHandler : logger.getParent().getHandlers()) {
+			logger.getParent().removeHandler(iHandler);
+		}
 
-        for (Handler iHandler : logger.getParent().getHandlers()) {
-            logger.getParent().removeHandler(iHandler);
-        }
+		logger.addHandler(new StdOutHandler());
+		if (JustMail.getInstance().getConfig().isDebug()) {
+			logger.setLevel(Level.ALL);
+		} else {
+			logger.setLevel(Level.CONFIG);
+		}
 
-        logger.addHandler(new StdOutHandler());
-        if (JustMail.getInstance().getConfig().isDebug()) {
-            logger.setLevel(Level.ALL);
-        } else {
-            logger.setLevel(Level.CONFIG);
-        }
+		return logger;
+	}
 
-        return logger;
-    }
+	private Environment checkEnvironment() {
+		return System.getenv().containsKey("SHELL") ? Environment.UNIX : Environment.WINDOWS;
+	}
 
-    private Environment checkEnvironment() {
-        return System.getenv().containsKey("SHELL") ? Environment.UNIX : Environment.WINDOWS;
-    }
+	public Logger getLogger() {
+		return logger;
+	}
 
-    public Logger getLogger() {
-        return logger;
-    }
-
-    public Environment getEnvironment() {
-        return environment;
-    }
+	public Environment getEnvironment() {
+		return environment;
+	}
 }

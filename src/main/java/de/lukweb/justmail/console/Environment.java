@@ -1,10 +1,10 @@
 package de.lukweb.justmail.console;
 
 public enum Environment {
-    UNIX,
-    WINDOWS;
+	UNIX,
+	WINDOWS;
 
-    public static Environment get() {
-        return JustLogger.getInstance().getEnvironment();
-    }
+	public static Environment get() {
+		return JustLogger.getInstance().getEnvironment();
+	}
 }

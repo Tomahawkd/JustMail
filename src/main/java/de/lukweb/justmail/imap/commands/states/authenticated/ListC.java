@@ -8,12 +8,12 @@ import de.lukweb.justmail.imap.commands.objects.ImapCommand;
  */
 public class ListC extends ImapCommand {
 
-    public ListC() {
-        super("list");
-    }
+	public ListC() {
+		super("list");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
 
-    }
+	}
 }

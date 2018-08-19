@@ -6,14 +6,14 @@ import de.lukweb.justmail.imap.responses.ImapResponse;
 
 public class StarttlsC extends ImapCommand {
 
-    public StarttlsC() {
-        super("starttls");
-    }
+	public StarttlsC() {
+		super("starttls");
+	}
 
-    @Override
-    public void execute(String[] arguments, String tag, ImapSession session) {
-        session.send(ImapResponse.OK.create(tag, "Begin TLS negotiation now"));
-        session.upgradeToSSL();
-    }
+	@Override
+	public void execute(String[] arguments, String tag, ImapSession session) {
+		session.send(ImapResponse.OK.create(tag, "Begin TLS negotiation now"));
+		session.upgradeToSSL();
+	}
 
 }

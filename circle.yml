@@ -3,11 +3,11 @@ general:
     ignore:
     - gh-pages
   artifacts:
-    - "target/JustMail.jar"
+  - "target/JustMail.jar"
 
 machine:
   java:
     version: oraclejdk8
 test:
   override:
-    - mvn package
+  - mvn package
