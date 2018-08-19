@@ -1,33 +1,18 @@
-package de.lukweb.justmail.sql;
+package de.lukweb.justmail.sql.databases;
 
-import java.io.File;
+import de.lukweb.justmail.config.DBConfig;
+
 import java.sql.*;
 
-public class SqlLite {
+abstract class AbstractDBConnector implements DBConnector {
 
-	private File file;
-	private Connection connection;
+	protected Connection connection;
 
-	public SqlLite(String file) {
-		this(new File(file));
+	AbstractDBConnector(DBConfig config) {
+		connect(config.getDriver(), config.getUrl(), config.getUsername(), config.getPassword());
 	}
 
-	public SqlLite(File file) {
-		this.file = file;
-		connect();
-	}
-
-	private boolean connect() {
-		try {
-			if (connection != null && !connection.isClosed()) return true;
-			Class.forName("org.sqlite.JDBC");
-			connection = DriverManager.getConnection("jdbc:sqlite:" + file.getPath().replaceAll("\\\\", "/"));
-			return isConnected();
-		} catch (SQLException | ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
+	protected abstract void connect(String driver, String url, String username, String password);
 
 	public boolean isConnected() {
 		try {
@@ -35,6 +20,15 @@ public class SqlLite {
 		} catch (SQLException e) {
 			return false;
 		}
+	}
+
+	@Override
+	public int readVersion() throws SQLException {
+		ResultSet rs = querySelect("SELECT * FROM version");
+		if (rs.next()) {
+			return rs.getInt("db_version");
+		}
+		return -1;
 	}
 
 	public void queryUpdate(String query, Object... arguments) {
@@ -72,6 +66,4 @@ public class SqlLite {
 			e.printStackTrace();
 		}
 	}
-
-
 }
